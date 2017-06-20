@@ -1,10 +1,11 @@
-## Authorization code grant configuration
+## oAuth 2.0 Authorization code grant
 
-1. Update the client id and secret
-2. Ensure the client is configured with the correct return url in the auth server. It looks something similar to `http://localhost:5002/signin-oidc`
-3. Grant type should be at least `authorization_code`
-4. Scope include at least `user profile your user identifier`
 
+[RFC reference](https://tools.ietf.org/html/rfc6749#section-4.1)
+
+### Screen cast of working sample
+
+![Demo](../Assets/auth_code_grant_218.gif "sample app")
 
 ### Interaction 1: Redirecting the Employee to the Auth server
 
@@ -48,3 +49,11 @@ client_id=<<id>>&client_secret=<<secret>>&code=<<code_received_from_above_reques
 ```
 {token:'<<generatedtoken>>',scheme: 'bearer'}
 ```
+
+
+#### Running the sample
+
+1. Update the client id and secret
+2. Ensure the client is configured with the correct return url in the auth server (talk to PageUp rep). It looks something similar to `http://localhost:5002/signin-oidc`
+3. Ensure Grant type should be at least `authorization_code`
+4. Scope include at least `user profile your user identifier`
