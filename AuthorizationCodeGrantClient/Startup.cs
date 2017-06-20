@@ -62,11 +62,11 @@ namespace MvcClient
                 Authority = "https://testus.loginuat.pageuppeople.com",
                 RequireHttpsMetadata = false,
 
-                ClientId = "adsf", // TODO: enter credds here
-                ClientSecret = "df",
+                ClientId = "<<your_client_id_here>>", // TODO: enter credds here
+                ClientSecret = "<<your_client_secret_here>>",
 
                 ResponseType = "code",
-                Scope = { "Compliance.Write", "Compliance.Read" },
+                Scope = { "scope1", "scope2" },
 
                 GetClaimsFromUserInfoEndpoint = false,
                 SaveTokens = true,
