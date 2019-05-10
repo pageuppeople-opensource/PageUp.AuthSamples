@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System;
 
 namespace MvcClient
 {
@@ -30,14 +32,39 @@ namespace MvcClient
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddAuthentication()
+                .AddCookie()
+                .AddOpenIdConnect("PageUp", ConfigureOpenIdConnect);
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConfiguration(Configuration.GetSection("Logging"));
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+            });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        private void ConfigureOpenIdConnect(OpenIdConnectOptions obj)
+        {
+            obj.SignInScheme = "Cookies";
+
+            obj.Authority = "https://testus.loginuat.pageuppeople.com";
+            obj.RequireHttpsMetadata = false;
+
+            obj.ClientId = "<<your_client_id_here>>";
+            obj.ClientSecret = "<<your_client_secret_here>>";
+
+            obj.ResponseType = "code";
+
+            obj.GetClaimsFromUserInfoEndpoint = false;
+            obj.SaveTokens = true;
+            obj.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
+            obj.BackchannelHttpHandler = new TokenMessageHandler();
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
 
             if (env.IsDevelopment())
             {
@@ -48,33 +75,6 @@ namespace MvcClient
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AuthenticationScheme = "Cookies"
-            });
-
-
-            app.UseOpenIdConnectAuthentication(new OpenIdConnectOptions
-            {
-                AuthenticationScheme = "PageUp",
-                SignInScheme = "Cookies",
-
-                Authority = "https://testus.loginuat.pageuppeople.com",
-                RequireHttpsMetadata = false,
-
-                ClientId = "<<your_client_id_here>>", // TODO: enter credds here
-                ClientSecret = "<<your_client_secret_here>>",
-
-                ResponseType = "code",
-                Scope = { "scope1", "scope2" },
-
-                GetClaimsFromUserInfoEndpoint = false,
-                SaveTokens = true,
-                AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet,
-                BackchannelHttpHandler = new TokenMessageHandler()
-
-            });
-            
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();
         }

@@ -25,8 +25,8 @@ namespace MvcClient.Controllers
 
         public async Task Logout()
         {
-            await HttpContext.Authentication.SignOutAsync("Cookies");
-            await HttpContext.Authentication.SignOutAsync("oidc");
+            await HttpContext.SignOutAsync("Cookies");
+            await HttpContext.SignOutAsync("oidc");
         }
 
         public IActionResult Error()
@@ -36,8 +36,21 @@ namespace MvcClient.Controllers
 
         public async Task<IActionResult> CallApiUsingClientCredentials()
         {
-            var tokenClient = new TokenClient("http://localhost:5000/connect/token", "mvc", "secret");
-            var tokenResponse = await tokenClient.RequestClientCredentialsAsync("api1");
+            var tokenClient = new HttpClient();
+            var tokenResponse = await tokenClient.RequestTokenAsync(new TokenRequest
+            {
+                Address = "http://localhost:5000/connect/token",
+                GrantType = "custom",
+
+                ClientId = "mvc",
+                ClientSecret = "secret",
+
+                Parameters =
+                {
+                    { "custom_parameter", "custom value"},
+                    { "scope", "api1" }
+                }
+            });
 
             var client = new HttpClient();
             client.SetBearerToken(tokenResponse.AccessToken);
@@ -49,7 +62,7 @@ namespace MvcClient.Controllers
 
         public async Task<IActionResult> CallApiUsingUserAccessToken()
         {
-            var accessToken = await HttpContext.Authentication.GetTokenAsync("access_token");
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
 
             var client = new HttpClient();
             client.SetBearerToken(accessToken);
